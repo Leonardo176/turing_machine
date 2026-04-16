@@ -1,0 +1,17 @@
+{
+  "default_symbol": "b",
+  "symbols": ["b", "0"],
+  "state_aliases": [
+    { "name": "dog", "state": 0 },
+    { "name": "cat", "state": 1 }
+  ],
+  "current_state": 0,
+  "instructions": [
+    { "sst": 0, "ssy": "b", "est": 0, "esy": "0", "dir": "left" },
+    { "sst": "cat", "ssy": "0", "est": "dog", "esy": "0", "dir": "right" }
+  ],
+  "tape": {
+    "index": 10,
+    "data": "0b0b0000bb000b0b0bbb"
+  }
+}
