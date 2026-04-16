@@ -1,16 +1,22 @@
 mod instruction;
+mod state;
 mod symbol;
 mod tape;
 
-pub use instruction::Instruction;
+use instruction::SimpleInstruction;
+use state::AliasMgr;
+pub use state::State;
+pub use state::{Alias, alias};
 pub use symbol::Symbol;
 pub use tape::Direction;
 use tape::Tape;
 
-pub type State = u64;
+pub use instruction::Instruction;
+
+pub type SimpleState = u64;
 
 pub struct TuringMachine {
-    instructions: Vec<Instruction>,
+    instructions: Vec<SimpleInstruction>,
     tape: Tape<Symbol>,
 }
 
@@ -19,8 +25,13 @@ pub struct TuringMachine {
 // Because the instructions are sorted by start_state and start_sym,
 // we can just do a linear search and if two instructions are equal,
 // the check fails.
-fn check_instructions(instructions: &Vec<Instruction>) -> bool {
+fn check_instructions(instructions: &Vec<SimpleInstruction>) -> bool {
     let len = instructions.len();
+
+    if len == 0 {
+        return true;
+    }
+
     for i in 0..(len - 1) {
         if instructions[i] == instructions[i + 1] {
             return false;
@@ -33,15 +44,29 @@ fn check_instructions(instructions: &Vec<Instruction>) -> bool {
 impl TuringMachine {
     // Creates a Turing machine with an empty tape
     // and the given instructions.
-    pub fn new(mut instructions: Vec<Instruction>) -> Self {
-        instructions.sort();
+    pub fn new(aliases: Vec<Alias>, instructions: Vec<Instruction<Symbol>>) -> Self {
+        let aliases = AliasMgr::new(aliases);
 
-        if !check_instructions(&instructions) {
+        let mut simple_instructions = Vec::new();
+
+        for instr in instructions.iter() {
+            let instr = aliases.translate_instruction(instr);
+            if let Some(instr) = instr {
+                simple_instructions.push(instr);
+            } else {
+                panic!("Invalid instructions!");
+            }
+        }
+
+        simple_instructions.sort();
+
+        if !check_instructions(&simple_instructions) {
+            // TODO: handle error properly
             panic!("Instructions are not unique!");
         }
 
         Self {
-            instructions: instructions,
+            instructions: simple_instructions,
             tape: Tape::new(),
         }
     }
@@ -51,9 +76,10 @@ impl TuringMachine {
     pub fn from_tape(
         tape_index: usize,
         tape_data: &[Symbol],
-        instructions: Vec<Instruction>,
+        aliases: Vec<Alias>,
+        instructions: Vec<Instruction<Symbol>>,
     ) -> Self {
-        let mut tm = Self::new(instructions);
+        let mut tm = Self::new(aliases, instructions);
         tm.tape = Tape::from(tape_index, tape_data);
 
         tm
@@ -62,10 +88,10 @@ impl TuringMachine {
     // It computes a single instruction. It returns the next state that
     // the Turing machine needs to be to compute the next instruction
     // (None if no instruction was found (it has terminated)).
-    fn compute_single(&mut self, current_state: State) -> Option<State> {
+    fn compute_single(&mut self, current_state: SimpleState) -> Option<SimpleState> {
         let index_instr = self
             .instructions
-            .binary_search(&Instruction::new(
+            .binary_search(&SimpleInstruction::new(
                 current_state,
                 self.tape.get_symbol(),
                 0,

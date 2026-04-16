@@ -4,7 +4,7 @@ mod str;
 use node::{Link, Node};
 use std::rc::Rc;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Direction {
     Left,
     Right,

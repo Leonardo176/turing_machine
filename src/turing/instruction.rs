@@ -1,35 +1,51 @@
-use super::*;
-use std::cmp::Ordering;
+mod simple;
 
-pub struct Instruction(pub State, pub Symbol, pub State, pub Symbol, pub Direction);
+pub use simple::SimpleInstruction;
 
-impl Instruction {
-    pub fn new(sst: State, ssym: Symbol, nst: State, nsym: Symbol, dir: Direction) -> Self {
-        Self(sst, ssym, nst, nsym, dir)
-    }
+use super::{Direction, state::State};
+
+pub struct Instruction<S: Copy + Ord> {
+    start_state: State,
+    start_symbol: S,
+    end_state: State,
+    end_symbol: S,
+    direction: Direction,
 }
 
-impl PartialEq for Instruction {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0 && self.1 == other.1
+impl<S: Copy + Ord> Instruction<S> {
+    pub fn new(
+        start_state: State,
+        start_symbol: S,
+        end_state: State,
+        end_symbol: S,
+        direction: Direction,
+    ) -> Self {
+        Self {
+            start_state,
+            start_symbol,
+            end_state,
+            end_symbol,
+            direction,
+        }
     }
-}
 
-impl Eq for Instruction {}
-
-impl PartialOrd for Instruction {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        use Ordering::*;
-        Some(match self.0.cmp(&other.0) {
-            Less => Less,
-            Greater => Greater,
-            Equal => self.1.cmp(&other.1),
-        })
+    pub fn start_state(&self) -> &State {
+        &self.start_state
     }
-}
 
-impl Ord for Instruction {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
+    pub fn start_symbol(&self) -> S {
+        self.start_symbol
+    }
+
+    pub fn end_state(&self) -> &State {
+        &self.end_state
+    }
+
+    pub fn end_symbol(&self) -> S {
+        self.end_symbol
+    }
+
+    pub fn direction(&self) -> Direction {
+        self.direction
     }
 }
