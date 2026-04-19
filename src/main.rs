@@ -3,12 +3,10 @@ mod turing;
 use turing::{Alias, Direction::*, Instruction, State::Int, Symbol::*, TuringMachine, alias};
 
 fn main() {
-    // Creating a Turing Machine from a tape
-    let mut tm = TuringMachine::from_tape(
-        0,
-        &[Blank, Zero, Zero, Zero, Zero, Zero],
-        vec![Alias::new("start", 0), Alias::new("idk", 5)],
-        vec![
+    let mut tm = TuringMachine::builder()
+        .aliases(vec![Alias::new("start", 0), Alias::new("idk", 5)])
+        .tape(0, &[Blank, Zero, Zero, Zero, Zero, Zero])
+        .instructions(vec![
             // This instructions move the "given" string after the first blank
             // Example: given this tape (b00000) where the current index is on the first blank
             // This is the result (bbbbbb00000b) and now the current index is the last b
@@ -24,8 +22,8 @@ fn main() {
             Instruction::new(alias("idk"), Blank, Int(6), Blank, Right),
             Instruction::new(Int(5), Zero, Int(5), Zero, Left),
             Instruction::new(Int(6), Zero, Int(1), Blank, Right),
-        ],
-    );
+        ])
+        .build();
 
     tm.compute();
 

@@ -1,3 +1,4 @@
+mod builder;
 mod instruction;
 mod state;
 mod symbol;
@@ -13,9 +14,12 @@ use tape::Tape;
 
 pub use instruction::Instruction;
 
+use builder::TuringMachineBuilder;
+
 pub type SimpleState = u64;
 
 pub struct TuringMachine {
+    alias_mgr: AliasMgr,
     instructions: Vec<SimpleInstruction>,
     tape: Tape<Symbol>,
 }
@@ -25,7 +29,7 @@ pub struct TuringMachine {
 // Because the instructions are sorted by start_state and start_sym,
 // we can just do a linear search and if two instructions are equal,
 // the check fails.
-fn check_instructions(instructions: &Vec<SimpleInstruction>) -> bool {
+fn check_instructions(instructions: &[SimpleInstruction]) -> bool {
     let len = instructions.len();
 
     if len == 0 {
@@ -42,47 +46,8 @@ fn check_instructions(instructions: &Vec<SimpleInstruction>) -> bool {
 }
 
 impl TuringMachine {
-    // Creates a Turing machine with an empty tape
-    // and the given instructions.
-    pub fn new(aliases: Vec<Alias>, instructions: Vec<Instruction<Symbol>>) -> Self {
-        let aliases = AliasMgr::new(aliases);
-
-        let mut simple_instructions = Vec::new();
-
-        for instr in instructions.iter() {
-            let instr = aliases.translate_instruction(instr);
-            if let Some(instr) = instr {
-                simple_instructions.push(instr);
-            } else {
-                panic!("Invalid instructions!");
-            }
-        }
-
-        simple_instructions.sort();
-
-        if !check_instructions(&simple_instructions) {
-            // TODO: handle error properly
-            panic!("Instructions are not unique!");
-        }
-
-        Self {
-            instructions: simple_instructions,
-            tape: Tape::new(),
-        }
-    }
-
-    // Creates a Turing machine with the instructions given and
-    // the given tape.
-    pub fn from_tape(
-        tape_index: usize,
-        tape_data: &[Symbol],
-        aliases: Vec<Alias>,
-        instructions: Vec<Instruction<Symbol>>,
-    ) -> Self {
-        let mut tm = Self::new(aliases, instructions);
-        tm.tape = Tape::from(tape_index, tape_data);
-
-        tm
+    pub fn builder() -> TuringMachineBuilder {
+        TuringMachineBuilder::new()
     }
 
     // It computes a single instruction. It returns the next state that

@@ -72,19 +72,15 @@ impl AliasMgr {
         &self,
         instruction: &Instruction<Symbol>,
     ) -> Option<SimpleInstruction> {
-        if let (Some(start_state), Some(end_state)) = (
-            self.translate_state(instruction.start_state()),
-            self.translate_state(instruction.end_state()),
-        ) {
-            Some(SimpleInstruction(
-                start_state,
-                instruction.start_symbol(),
-                end_state,
-                instruction.end_symbol(),
-                instruction.direction(),
-            ))
-        } else {
-            None
-        }
+        let start_state = self.translate_state(instruction.start_state())?;
+        let end_state = self.translate_state(instruction.end_state())?;
+
+        Some(SimpleInstruction(
+            start_state,
+            instruction.start_symbol(),
+            end_state,
+            instruction.end_symbol(),
+            instruction.direction(),
+        ))
     }
 }
