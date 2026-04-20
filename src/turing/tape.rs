@@ -45,6 +45,10 @@ impl Tape {
         tape
     }
 
+    pub fn default_symbol(&self) -> char {
+        self.default_symbol
+    }
+
     pub fn get_symbol(&self) -> char {
         self.pos.get_symbol()
     }

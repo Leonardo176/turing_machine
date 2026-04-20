@@ -14,17 +14,35 @@ pub use instruction::Instruction;
 
 use builder::TuringMachineBuilder;
 
+use crate::common::has_unique_elements;
+
 pub type SimpleState = u64;
 
 pub struct TuringMachine {
     alias_mgr: AliasMgr,
     instructions: Vec<SimpleInstruction>,
+    symbols: Vec<char>,
     tape: Tape,
 }
 
 impl TuringMachine {
-    pub fn builder() -> TuringMachineBuilder {
-        TuringMachineBuilder::new()
+    pub fn new(default_symbol: char, mut symbols: Vec<char>) -> Self {
+        symbols.sort();
+
+        if !has_unique_elements(&symbols) {
+            panic!("Symbols are not unique!");
+        }
+
+        Self {
+            alias_mgr: AliasMgr::new(Vec::new()),
+            instructions: Vec::new(),
+            symbols,
+            tape: Tape::new(default_symbol),
+        }
+    }
+
+    pub fn builder<'a>(default_symbol: char, symbols: Vec<char>) -> TuringMachineBuilder<'a> {
+        TuringMachineBuilder::new(default_symbol, symbols)
     }
 
     // It computes a single instruction. It returns the next state that
@@ -40,22 +58,30 @@ impl TuringMachine {
                 char::default(),
                 Direction::Left,
             ))
-            .ok();
+            .ok()?;
 
-        if let Some(index_instr) = index_instr {
-            let instr = &self.instructions[index_instr];
+        let instr = &self.instructions[index_instr];
 
-            self.tape.set_symbol(instr.3);
-
-            match instr.4 {
-                Direction::Left => self.tape.move_left(),
-                Direction::Right => self.tape.move_right(),
+        // check that the symbols of the instruction are in the array of symbols
+        match (
+            self.symbols.binary_search(&instr.1),
+            self.symbols.binary_search(&instr.3),
+        ) {
+            (Ok(_), Ok(_)) => (),
+            _ => {
+                // TODO: handle error properly
+                panic!("Symbols in an instruction are not valid!");
             }
-
-            Some(instr.2)
-        } else {
-            None
         }
+
+        self.tape.set_symbol(instr.3);
+
+        match instr.4 {
+            Direction::Left => self.tape.move_left(),
+            Direction::Right => self.tape.move_right(),
+        }
+
+        Some(instr.2)
     }
 
     // Computes the instructions until it terminates.
