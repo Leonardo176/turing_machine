@@ -1,4 +1,7 @@
-use crate::turing::{SimpleInstruction, instruction::Instruction};
+use crate::{
+    common::has_unique_elements,
+    turing::{SimpleInstruction, instruction::Instruction},
+};
 
 pub enum State {
     Str(String),
@@ -28,28 +31,11 @@ pub struct AliasMgr {
     aliases: Vec<Alias>,
 }
 
-// aliases must be sorted
-fn check_aliases(aliases: &[Alias]) -> bool {
-    let len = aliases.len();
-
-    if len == 0 {
-        return true;
-    }
-
-    for i in 0..(len - 1) {
-        if aliases[i].name == aliases[i + 1].name {
-            return false;
-        }
-    }
-
-    true
-}
-
 impl AliasMgr {
     pub fn new(mut aliases: Vec<Alias>) -> Self {
         aliases.sort();
 
-        if !check_aliases(&aliases) {
+        if !has_unique_elements(&aliases) {
             // TODO: properly handle errors
             panic!("Aliases are not unique!");
         }

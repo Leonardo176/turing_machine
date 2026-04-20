@@ -1,3 +1,4 @@
+mod common;
 mod turing;
 
 use turing::{Alias, Direction::*, Instruction, State::Int, TuringMachine, alias};

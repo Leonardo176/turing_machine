@@ -1,4 +1,5 @@
-use super::{Alias, Instruction, TuringMachine, check_instructions, state::AliasMgr, tape::Tape};
+use super::{Alias, Instruction, TuringMachine, state::AliasMgr, tape::Tape};
+use crate::common::has_unique_elements;
 
 pub struct TuringMachineBuilder {
     tm: TuringMachine,
@@ -49,7 +50,7 @@ impl TuringMachineBuilder {
 
         simple_instructions.sort();
 
-        if !check_instructions(&simple_instructions) {
+        if !has_unique_elements(&simple_instructions) {
             panic!("Error: instructions are not unique!");
         }
 

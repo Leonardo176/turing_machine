@@ -22,27 +22,6 @@ pub struct TuringMachine {
     tape: Tape,
 }
 
-// Checks that the instructions are unique (for all i1, i2 in instructions,
-// i1.start_state == i2.start_state && i1.start_sym == i2.start_sym -> i1 = i2).
-// Because the instructions are sorted by start_state and start_sym,
-// we can just do a linear search and if two instructions are equal,
-// the check fails.
-fn check_instructions(instructions: &[SimpleInstruction]) -> bool {
-    let len = instructions.len();
-
-    if len == 0 {
-        return true;
-    }
-
-    for i in 0..(len - 1) {
-        if instructions[i] == instructions[i + 1] {
-            return false;
-        }
-    }
-
-    true
-}
-
 impl TuringMachine {
     pub fn builder() -> TuringMachineBuilder {
         TuringMachineBuilder::new()
