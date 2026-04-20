@@ -10,22 +10,24 @@ pub enum Direction {
     Right,
 }
 
-pub struct Tape<S: Default + Copy> {
-    start: Link<S>,
-    pos: Link<S>,
+pub struct Tape {
+    default_symbol: char,
+    start: Link,
+    pos: Link,
 }
 
-impl<S: Default + Copy> Tape<S> {
-    pub fn new() -> Self {
-        let new_node = Rc::new(Node::new());
+impl Tape {
+    pub fn new(default_symbol: char) -> Self {
+        let new_node = Rc::new(Node::from(default_symbol));
         Self {
+            default_symbol,
             start: new_node.clone(),
             pos: new_node,
         }
     }
 
-    pub fn from(index: usize, data: &[S]) -> Self {
-        let mut tape = Self::new();
+    pub fn from(default_symbol: char, index: usize, data: &[char]) -> Self {
+        let mut tape = Self::new(default_symbol);
         let mut pos = tape.pos.clone();
         let len = data.len();
 
@@ -43,11 +45,11 @@ impl<S: Default + Copy> Tape<S> {
         tape
     }
 
-    pub fn get_symbol(&self) -> S {
+    pub fn get_symbol(&self) -> char {
         self.pos.get_symbol()
     }
 
-    pub fn set_symbol(&mut self, symbol: S) {
+    pub fn set_symbol(&mut self, symbol: char) {
         self.pos.set_symbol(symbol);
     }
 
@@ -55,7 +57,7 @@ impl<S: Default + Copy> Tape<S> {
         if let Some(left) = self.pos.get_left() {
             self.pos = left;
         } else {
-            let new_node = Rc::new(Node::<S>::new());
+            let new_node = Rc::new(Node::from(self.default_symbol));
             new_node.set_right(self.pos.clone());
             self.pos.set_left(new_node.clone());
 
@@ -68,7 +70,7 @@ impl<S: Default + Copy> Tape<S> {
         if let Some(right) = self.pos.get_right() {
             self.pos = right;
         } else {
-            let new_node = Rc::new(Node::<S>::new());
+            let new_node = Rc::new(Node::from(self.default_symbol));
             new_node.set_left(self.pos.clone());
             self.pos.set_right(new_node.clone());
 

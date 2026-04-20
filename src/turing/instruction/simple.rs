@@ -1,22 +1,16 @@
-use crate::turing::{Direction, SimpleState, Symbol};
+use crate::turing::{Direction, SimpleState};
 use std::cmp::Ordering;
 
 pub struct SimpleInstruction(
     pub SimpleState,
-    pub Symbol,
+    pub char,
     pub SimpleState,
-    pub Symbol,
+    pub char,
     pub Direction,
 );
 
 impl SimpleInstruction {
-    pub fn new(
-        sst: SimpleState,
-        ssym: Symbol,
-        nst: SimpleState,
-        nsym: Symbol,
-        dir: Direction,
-    ) -> Self {
+    pub fn new(sst: SimpleState, ssym: char, nst: SimpleState, nsym: char, dir: Direction) -> Self {
         Self(sst, ssym, nst, nsym, dir)
     }
 }

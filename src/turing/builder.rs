@@ -1,11 +1,9 @@
-use super::{
-    Alias, Instruction, Symbol, TuringMachine, check_instructions, state::AliasMgr, tape::Tape,
-};
+use super::{Alias, Instruction, TuringMachine, check_instructions, state::AliasMgr, tape::Tape};
 
 pub struct TuringMachineBuilder {
     tm: TuringMachine,
     aliases: Vec<Alias>,
-    instructions: Vec<Instruction<Symbol>>,
+    instructions: Vec<Instruction>,
 }
 
 impl TuringMachineBuilder {
@@ -15,19 +13,19 @@ impl TuringMachineBuilder {
             tm: TuringMachine {
                 alias_mgr: AliasMgr::new(Vec::new()),
                 instructions: Vec::new(),
-                tape: Tape::new(),
+                tape: Tape::new('b'),
             },
             instructions: Vec::new(),
         }
     }
 
-    pub fn instructions(mut self, instructions: Vec<Instruction<Symbol>>) -> Self {
+    pub fn instructions(mut self, instructions: Vec<Instruction>) -> Self {
         self.instructions = instructions;
         self
     }
 
-    pub fn tape(mut self, tape_index: usize, tape_data: &[Symbol]) -> Self {
-        self.tm.tape = Tape::from(tape_index, tape_data);
+    pub fn tape(mut self, tape_index: usize, tape_data: &[char]) -> Self {
+        self.tm.tape = Tape::from('b', tape_index, tape_data);
         self
     }
 

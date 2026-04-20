@@ -1,4 +1,4 @@
-use crate::turing::{SimpleInstruction, Symbol, instruction::Instruction};
+use crate::turing::{SimpleInstruction, instruction::Instruction};
 
 pub enum State {
     Str(String),
@@ -68,10 +68,7 @@ impl AliasMgr {
         }
     }
 
-    pub fn translate_instruction(
-        &self,
-        instruction: &Instruction<Symbol>,
-    ) -> Option<SimpleInstruction> {
+    pub fn translate_instruction(&self, instruction: &Instruction) -> Option<SimpleInstruction> {
         let start_state = self.translate_state(instruction.start_state())?;
         let end_state = self.translate_state(instruction.end_state())?;
 

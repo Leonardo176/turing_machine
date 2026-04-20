@@ -1,14 +1,12 @@
 mod builder;
 mod instruction;
 mod state;
-mod symbol;
 mod tape;
 
 use instruction::SimpleInstruction;
 use state::AliasMgr;
 pub use state::State;
 pub use state::{Alias, alias};
-pub use symbol::Symbol;
 pub use tape::Direction;
 use tape::Tape;
 
@@ -21,7 +19,7 @@ pub type SimpleState = u64;
 pub struct TuringMachine {
     alias_mgr: AliasMgr,
     instructions: Vec<SimpleInstruction>,
-    tape: Tape<Symbol>,
+    tape: Tape,
 }
 
 // Checks that the instructions are unique (for all i1, i2 in instructions,
@@ -60,7 +58,7 @@ impl TuringMachine {
                 current_state,
                 self.tape.get_symbol(),
                 0,
-                Symbol::default(),
+                char::default(),
                 Direction::Left,
             ))
             .ok();

@@ -4,20 +4,20 @@ pub use simple::SimpleInstruction;
 
 use super::{Direction, state::State};
 
-pub struct Instruction<S: Copy + Ord> {
+pub struct Instruction {
     start_state: State,
-    start_symbol: S,
+    start_symbol: char,
     end_state: State,
-    end_symbol: S,
+    end_symbol: char,
     direction: Direction,
 }
 
-impl<S: Copy + Ord> Instruction<S> {
+impl Instruction {
     pub fn new(
         start_state: State,
-        start_symbol: S,
+        start_symbol: char,
         end_state: State,
-        end_symbol: S,
+        end_symbol: char,
         direction: Direction,
     ) -> Self {
         Self {
@@ -33,7 +33,7 @@ impl<S: Copy + Ord> Instruction<S> {
         &self.start_state
     }
 
-    pub fn start_symbol(&self) -> S {
+    pub fn start_symbol(&self) -> char {
         self.start_symbol
     }
 
@@ -41,7 +41,7 @@ impl<S: Copy + Ord> Instruction<S> {
         &self.end_state
     }
 
-    pub fn end_symbol(&self) -> S {
+    pub fn end_symbol(&self) -> char {
         self.end_symbol
     }
 
