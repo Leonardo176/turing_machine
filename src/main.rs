@@ -5,6 +5,7 @@ use turing::{Alias, Direction::*, Instruction, State::Int, TuringMachine, alias}
 
 fn main() {
     let mut tm = TuringMachine::builder('b', vec!['b', '0'])
+        .initial_state(alias("start"))
         .aliases(vec![Alias::new("start", 0), Alias::new("idk", 5)])
         .tape(0, &['b', '0', '0', '0', '0', '0'])
         .instructions(vec![

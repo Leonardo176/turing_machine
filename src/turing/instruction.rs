@@ -49,3 +49,15 @@ impl Instruction {
         self.direction
     }
 }
+
+impl From<&SimpleInstruction> for Instruction {
+    fn from(instr: &SimpleInstruction) -> Self {
+        Self {
+            start_state: State::Int(instr.0),
+            start_symbol: instr.1,
+            end_state: State::Int(instr.2),
+            end_symbol: instr.3,
+            direction: instr.4,
+        }
+    }
+}

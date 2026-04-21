@@ -1,6 +1,6 @@
 use crate::{
     common::has_unique_elements,
-    turing::{SimpleInstruction, instruction::Instruction},
+    turing::{SimpleInstruction, SimpleState, instruction::Instruction},
 };
 
 pub enum State {
@@ -43,7 +43,7 @@ impl AliasMgr {
         Self { aliases }
     }
 
-    fn translate_state(&self, state: &State) -> Option<u64> {
+    pub fn translate_state(&self, state: &State) -> Option<SimpleState> {
         match state {
             State::Int(num) => Some(*num),
             State::Str(string) => self

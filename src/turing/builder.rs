@@ -1,8 +1,9 @@
 use super::{Alias, Instruction, TuringMachine, state::AliasMgr, tape::Tape};
-use crate::common::has_unique_elements;
+use crate::{common::has_unique_elements, turing::State};
 
 pub struct TuringMachineBuilder<'a> {
     tm: TuringMachine,
+    initial_state: State,
     tape_index: usize,
     tape_data: &'a [char],
     aliases: Vec<Alias>,
@@ -14,6 +15,7 @@ impl<'a> TuringMachineBuilder<'a> {
         Self {
             tape_index: 0,
             tape_data: &[],
+            initial_state: State::Int(0),
             aliases: Vec::new(),
             tm: TuringMachine::new(default_symbol, symbols),
             instructions: Vec::new(),
@@ -36,12 +38,26 @@ impl<'a> TuringMachineBuilder<'a> {
         self
     }
 
+    pub fn initial_state(mut self, initial_state: State) -> Self {
+        self.initial_state = initial_state;
+        self
+    }
+
     pub fn build(self) -> TuringMachine {
         let mut tm = self.tm;
 
         // Build aliases
 
         tm.alias_mgr = AliasMgr::new(self.aliases);
+
+        // Build initial state
+
+        match tm.alias_mgr.translate_state(&self.initial_state) {
+            Some(state) => tm.current_state = state,
+            None => {
+                panic!("Initial state not found in state aliases!");
+            }
+        }
 
         // Build instructions
 

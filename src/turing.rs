@@ -20,6 +20,7 @@ pub type SimpleState = u64;
 
 pub struct TuringMachine {
     alias_mgr: AliasMgr,
+    current_state: SimpleState,
     instructions: Vec<SimpleInstruction>,
     symbols: Vec<char>,
     tape: Tape,
@@ -33,8 +34,14 @@ impl TuringMachine {
             panic!("Symbols are not unique!");
         }
 
+        // if default_symbol is not in symbols
+        if symbols.binary_search(&default_symbol).is_err() {
+            panic!("Default symbol is not in symbols!");
+        }
+
         Self {
             alias_mgr: AliasMgr::new(Vec::new()),
+            current_state: 0,
             instructions: Vec::new(),
             symbols,
             tape: Tape::new(default_symbol),
@@ -45,14 +52,13 @@ impl TuringMachine {
         TuringMachineBuilder::new(default_symbol, symbols)
     }
 
-    // It computes a single instruction. It returns the next state that
-    // the Turing machine needs to be to compute the next instruction
-    // (None if no instruction was found (it has terminated)).
-    fn compute_single(&mut self, current_state: SimpleState) -> Option<SimpleState> {
+    // It computes a single instruction. It returns the executed instruction.
+    // The instruction returned has always the state as integers.
+    fn compute_single(&mut self) -> Option<Instruction> {
         let index_instr = self
             .instructions
             .binary_search(&SimpleInstruction::new(
-                current_state,
+                self.current_state,
                 self.tape.get_symbol(),
                 0,
                 char::default(),
@@ -63,17 +69,14 @@ impl TuringMachine {
         let instr = &self.instructions[index_instr];
 
         // check that the symbols of the instruction are in the array of symbols
-        match (
-            self.symbols.binary_search(&instr.1),
-            self.symbols.binary_search(&instr.3),
-        ) {
-            (Ok(_), Ok(_)) => (),
-            _ => {
-                // TODO: handle error properly
-                panic!("Symbols in an instruction are not valid!");
-            }
+        if self.symbols.binary_search(&instr.1).is_err()
+            || self.symbols.binary_search(&instr.3).is_err()
+        {
+            // TODO: handle error properly
+            panic!("One of the symbols in an instruction is not in the symbols!");
         }
 
+        self.current_state = instr.2;
         self.tape.set_symbol(instr.3);
 
         match instr.4 {
@@ -81,16 +84,12 @@ impl TuringMachine {
             Direction::Right => self.tape.move_right(),
         }
 
-        Some(instr.2)
+        Some(Instruction::from(instr))
     }
 
     // Computes the instructions until it terminates.
     pub fn compute(&mut self) {
-        let mut current_state = 0;
-
-        while let Some(state) = self.compute_single(current_state) {
-            current_state = state;
-        }
+        while self.compute_single().is_some() {}
     }
 
     // Get the current tape.
