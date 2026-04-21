@@ -65,7 +65,14 @@ impl<'a> TuringMachineBuilder<'a> {
 
         for instr in self.instructions.iter() {
             match tm.alias_mgr.translate_instruction(instr) {
-                Some(instr) => simple_instructions.push(instr),
+                Some(instr) => {
+                    // check that symbols of instr are in tm.symbols
+                    if tm.symbols.binary_search(&instr.1).is_ok()
+                        && tm.symbols.binary_search(&instr.3).is_ok()
+                    {
+                        simple_instructions.push(instr)
+                    }
+                }
                 None => (),
             }
         }

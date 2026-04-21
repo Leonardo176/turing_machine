@@ -3,20 +3,17 @@ mod instruction;
 mod state;
 mod tape;
 
-use instruction::SimpleInstruction;
-use state::AliasMgr;
-pub use state::State;
-pub use state::{Alias, alias};
-pub use tape::Direction;
-use tape::Tape;
-
 pub use instruction::Instruction;
-
-use builder::TuringMachineBuilder;
+pub use state::{Alias, State, alias};
+pub use tape::Direction;
 
 use crate::common::has_unique_elements;
+use builder::TuringMachineBuilder;
+use instruction::SimpleInstruction;
+use state::AliasMgr;
+use tape::Tape;
 
-pub type SimpleState = u64;
+type SimpleState = u64;
 
 pub struct TuringMachine {
     alias_mgr: AliasMgr,
@@ -68,13 +65,7 @@ impl TuringMachine {
 
         let instr = &self.instructions[index_instr];
 
-        // check that the symbols of the instruction are in the array of symbols
-        if self.symbols.binary_search(&instr.1).is_err()
-            || self.symbols.binary_search(&instr.3).is_err()
-        {
-            // TODO: handle error properly
-            panic!("One of the symbols in an instruction is not in the symbols!");
-        }
+        // all instructions have known symbols (check builder.rs)
 
         self.current_state = instr.2;
         self.tape.set_symbol(instr.3);
