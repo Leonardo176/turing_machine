@@ -16,8 +16,9 @@ For now, you can do the following:
 
 This is what I want to implement:
 
-- [ ] State aliases
-- [ ] Custom symbols (for now only '0', 'b' symbols are supported)
+- [x] State aliases
+- [x] Custom symbols (for now only '0', 'b' symbols are supported)
+- [x] Implement a builder pattern for creating a Turing Machine
 - [ ] Import & Export a Turing Machine in JSON (there is already an example in input.json)
-- [ ] Implement a builder pattern for creating a Turing Machine
 - [ ] Support for reverse computing (being able to reserve the computation)
+- [ ] Better error handling

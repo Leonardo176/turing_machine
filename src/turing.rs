@@ -49,8 +49,8 @@ impl TuringMachine {
         TuringMachineBuilder::new(default_symbol, symbols)
     }
 
-    // It computes a single instruction. It returns the executed instruction.
-    // The instruction returned has always the state as integers.
+    // It computes a single instruction. Returns the executed instruction.
+    // The instruction returned has always its states as integers.
     fn compute_single(&mut self) -> Option<Instruction> {
         let index_instr = self
             .instructions
@@ -78,7 +78,7 @@ impl TuringMachine {
         Some(Instruction::from(instr))
     }
 
-    // Computes the instructions until it terminates.
+    // Computes instructions until it terminates.
     pub fn compute(&mut self) {
         while self.compute_single().is_some() {}
     }
