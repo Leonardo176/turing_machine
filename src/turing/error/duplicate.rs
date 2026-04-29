@@ -8,7 +8,7 @@ pub struct DuplicateError<T: fmt::Debug + fmt::Display> {
 }
 
 impl<T: fmt::Debug + fmt::Display> DuplicateError<T> {
-    pub fn new(first: T, second: T, type_name: &str) -> Self {
+    pub(crate) fn new(first: T, second: T, type_name: &str) -> Self {
         Self {
             first,
             second,

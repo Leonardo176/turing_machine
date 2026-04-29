@@ -7,7 +7,7 @@ pub struct NotFoundError<T: fmt::Debug + fmt::Display> {
 }
 
 impl<T: fmt::Debug + fmt::Display> NotFoundError<T> {
-    pub fn new(elem: T, container: &str) -> Self {
+    pub(crate) fn new(elem: T, container: &str) -> Self {
         Self {
             elem,
             container: String::from(container),

@@ -3,7 +3,9 @@ use crate::{
     common::has_unique_elements,
     turing::{
         State,
-        error::{BuilderError, InstructionError, InstructionFieldError, NotFoundError},
+        error::{
+            BuilderError, DuplicateError, InstructionError, InstructionFieldError, NotFoundError,
+        },
     },
 };
 
@@ -99,7 +101,11 @@ impl<'a> TuringMachineBuilder<'a> {
 
         simple_instructions.sort();
         if let Err(err) = has_unique_elements(&simple_instructions, "instruction") {
-            return Err(BuilderError::DupInstruction(err));
+            return Err(BuilderError::DupInstruction(DuplicateError::new(
+                tm.alias_mgr.translate_instruction_back(err.first()),
+                tm.alias_mgr.translate_instruction_back(err.second()),
+                err.type_name(),
+            )));
         }
 
         tm.instructions = simple_instructions;

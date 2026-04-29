@@ -1,13 +1,10 @@
 use super::{duplicate::DuplicateError, instruction::InstructionError, not_found::NotFoundError};
-use crate::{
-    Alias,
-    turing::{State, instruction::SimpleInstruction},
-};
+use crate::{Alias, Instruction, turing::State};
 
 #[derive(Debug)]
 pub enum BuilderError {
     Instruction(InstructionError),
-    DupInstruction(DuplicateError<SimpleInstruction>),
+    DupInstruction(DuplicateError<Instruction>),
     Alias(DuplicateError<Alias>),
     Symbol(DuplicateError<char>),
     InitialState(NotFoundError<State>),

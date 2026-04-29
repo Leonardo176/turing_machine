@@ -34,7 +34,7 @@ pub struct InstructionError {
 }
 
 impl InstructionError {
-    pub fn new(field: InstructionFieldError, instruction: Instruction) -> Self {
+    pub(crate) fn new(field: InstructionFieldError, instruction: Instruction) -> Self {
         Self { field, instruction }
     }
 

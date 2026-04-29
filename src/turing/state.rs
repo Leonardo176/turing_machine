@@ -89,6 +89,15 @@ impl AliasMgr {
         }
     }
 
+    pub fn translate_state_back(&self, state: SimpleState) -> State {
+        for st in self.aliases.iter() {
+            if st.state == state {
+                return alias(&st.name);
+            }
+        }
+        State::Int(state)
+    }
+
     pub fn translate_instruction(
         &self,
         instruction: &Instruction,
@@ -111,5 +120,17 @@ impl AliasMgr {
             instruction.end_symbol(),
             instruction.direction(),
         ))
+    }
+
+    pub fn translate_instruction_back(&self, instruction: &SimpleInstruction) -> Instruction {
+        let start_state = self.translate_state_back(instruction.0);
+        let end_state = self.translate_state_back(instruction.2);
+        Instruction::new(
+            start_state,
+            instruction.1,
+            end_state,
+            instruction.3,
+            instruction.4,
+        )
     }
 }
