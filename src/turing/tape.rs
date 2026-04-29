@@ -4,10 +4,24 @@ mod str;
 use node::{Link, Node};
 use std::rc::Rc;
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Direction {
     Left,
     Right,
+}
+
+impl std::fmt::Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use Direction::*;
+        write!(
+            f,
+            "{}",
+            match self {
+                Left => "Left",
+                Right => "Right",
+            }
+        )
+    }
 }
 
 pub struct Tape {

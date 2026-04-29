@@ -2,7 +2,8 @@ use super::{Alias, Instruction, TuringMachine, state::AliasMgr, tape::Tape};
 use crate::{common::has_unique_elements, turing::State};
 
 pub struct TuringMachineBuilder<'a> {
-    tm: TuringMachine,
+    default_symbol: char,
+    symbols: Vec<char>,
     initial_state: State,
     tape_index: usize,
     tape_data: &'a [char],
@@ -13,11 +14,12 @@ pub struct TuringMachineBuilder<'a> {
 impl<'a> TuringMachineBuilder<'a> {
     pub fn new(default_symbol: char, symbols: Vec<char>) -> Self {
         Self {
+            default_symbol,
+            symbols,
             tape_index: 0,
             tape_data: &[],
             initial_state: State::Int(0),
             aliases: Vec::new(),
-            tm: TuringMachine::new(default_symbol, symbols),
             instructions: Vec::new(),
         }
     }
@@ -44,14 +46,13 @@ impl<'a> TuringMachineBuilder<'a> {
     }
 
     pub fn build(self) -> TuringMachine {
-        let mut tm = self.tm;
+        // build basic TM
+        let mut tm = TuringMachine::new(self.default_symbol, self.symbols);
 
         // Build aliases
-
         tm.alias_mgr = AliasMgr::new(self.aliases);
 
         // Build initial state
-
         match tm.alias_mgr.translate_state(&self.initial_state) {
             Some(state) => tm.current_state = state,
             None => {
@@ -60,7 +61,6 @@ impl<'a> TuringMachineBuilder<'a> {
         }
 
         // Build instructions
-
         let mut simple_instructions = Vec::new();
 
         for instr in self.instructions.iter() {
@@ -71,22 +71,25 @@ impl<'a> TuringMachineBuilder<'a> {
                         && tm.symbols.binary_search(&instr.3).is_ok()
                     {
                         simple_instructions.push(instr)
+                    } else {
+                        // TODO: handle SymbolError
                     }
                 }
+                // TODO: handle StateAliasError
                 None => (),
             }
         }
 
         simple_instructions.sort();
-
         if !has_unique_elements(&simple_instructions) {
             panic!("Error: instructions are not unique!");
         }
 
+        tm.instructions = simple_instructions;
+
         // Build tape
         tm.tape = Tape::from(tm.tape.default_symbol(), self.tape_index, self.tape_data);
 
-        tm.instructions = simple_instructions;
         tm
     }
 }

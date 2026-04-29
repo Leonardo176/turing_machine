@@ -1,4 +1,5 @@
 mod builder;
+mod error;
 mod instruction;
 mod state;
 mod tape;

@@ -4,6 +4,7 @@ pub use simple::SimpleInstruction;
 
 use super::{Direction, state::State};
 
+#[derive(Debug)]
 pub struct Instruction {
     start_state: State,
     start_symbol: char,
@@ -59,5 +60,19 @@ impl From<&SimpleInstruction> for Instruction {
             end_symbol: instr.3,
             direction: instr.4,
         }
+    }
+}
+
+impl std::fmt::Display for Instruction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Instruction {{ start_state: {}, start_symbol: {}, end_state: {}, end_symbol: {}, direction: {} }}",
+            self.start_state(),
+            self.start_symbol(),
+            self.end_state(),
+            self.end_symbol(),
+            self.direction()
+        )
     }
 }

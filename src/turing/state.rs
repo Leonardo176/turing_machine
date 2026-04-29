@@ -3,6 +3,7 @@ use crate::{
     turing::{SimpleInstruction, SimpleState, instruction::Instruction},
 };
 
+#[derive(Debug)]
 pub enum State {
     Str(String),
     Int(u64),
@@ -12,7 +13,20 @@ pub fn alias(name: &str) -> State {
     State::Str(String::from(name))
 }
 
-#[derive(PartialEq, PartialOrd, Eq, Ord)]
+impl std::fmt::Display for State {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                State::Str(str) => str.to_owned(),
+                State::Int(int) => int.to_string(),
+            }
+        )
+    }
+}
+
+#[derive(Debug, PartialEq, PartialOrd, Eq, Ord)]
 pub struct Alias {
     name: String,
     state: u64,
@@ -24,6 +38,12 @@ impl Alias {
             name: String::from(name),
             state,
         }
+    }
+}
+
+impl std::fmt::Display for Alias {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
