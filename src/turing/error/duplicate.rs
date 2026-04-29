@@ -1,13 +1,13 @@
 use std::fmt;
 
 #[derive(Debug)]
-pub struct DuplicateError<T: Eq + fmt::Debug + fmt::Display> {
+pub struct DuplicateError<T: fmt::Debug + fmt::Display> {
     first: T,
     second: T,
     type_name: String,
 }
 
-impl<T: Eq + fmt::Debug + fmt::Display> DuplicateError<T> {
+impl<T: fmt::Debug + fmt::Display> DuplicateError<T> {
     pub fn new(first: T, second: T, type_name: &str) -> Self {
         Self {
             first,
@@ -29,7 +29,7 @@ impl<T: Eq + fmt::Debug + fmt::Display> DuplicateError<T> {
     }
 }
 
-impl<T: Eq + fmt::Debug + fmt::Display> fmt::Display for DuplicateError<T> {
+impl<T: fmt::Debug + fmt::Display> fmt::Display for DuplicateError<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -39,4 +39,4 @@ impl<T: Eq + fmt::Debug + fmt::Display> fmt::Display for DuplicateError<T> {
     }
 }
 
-impl<T: Eq + fmt::Debug + fmt::Display> std::error::Error for DuplicateError<T> {}
+impl<T: fmt::Debug + fmt::Display> std::error::Error for DuplicateError<T> {}

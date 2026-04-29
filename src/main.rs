@@ -25,7 +25,8 @@ fn main() {
             Instruction::new(Int(5), '0', Int(5), '0', Left),
             Instruction::new(Int(6), '0', Int(1), 'b', Right),
         ])
-        .build();
+        .build()
+        .unwrap();
 
     tm.compute();
 

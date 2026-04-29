@@ -1,5 +1,5 @@
 mod builder;
-mod error;
+pub mod error;
 mod instruction;
 mod state;
 mod tape;
@@ -10,6 +10,7 @@ pub use tape::Direction;
 
 use crate::common::has_unique_elements;
 use builder::TuringMachineBuilder;
+use error::{BuilderError, NotFoundError};
 use instruction::SimpleInstruction;
 use state::AliasMgr;
 use tape::Tape;
@@ -25,25 +26,28 @@ pub struct TuringMachine {
 }
 
 impl TuringMachine {
-    pub fn new(default_symbol: char, mut symbols: Vec<char>) -> Self {
+    pub fn new(default_symbol: char, mut symbols: Vec<char>) -> Result<Self, BuilderError> {
         symbols.sort();
 
-        if !has_unique_elements(&symbols) {
-            panic!("Symbols are not unique!");
+        if let Err(err) = has_unique_elements(&symbols, "symbol") {
+            return Err(BuilderError::Symbol(err));
         }
 
         // if default_symbol is not in symbols
         if symbols.binary_search(&default_symbol).is_err() {
-            panic!("Default symbol is not in symbols!");
+            return Err(BuilderError::DefaultSymbol(NotFoundError::new(
+                default_symbol,
+                "list of symbols",
+            )));
         }
 
-        Self {
-            alias_mgr: AliasMgr::new(Vec::new()),
+        Ok(Self {
+            alias_mgr: AliasMgr::new(Vec::new()).unwrap(),
             current_state: 0,
             instructions: Vec::new(),
             symbols,
             tape: Tape::new(default_symbol),
-        }
+        })
     }
 
     pub fn builder<'a>(default_symbol: char, symbols: Vec<char>) -> TuringMachineBuilder<'a> {

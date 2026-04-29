@@ -1,9 +1,13 @@
 use crate::{
-    common::has_unique_elements,
-    turing::{SimpleInstruction, SimpleState, instruction::Instruction},
+    common::has_unique_elements_by,
+    turing::{
+        SimpleInstruction, SimpleState,
+        error::{DuplicateError, InstructionError, InstructionFieldError, NotFoundError},
+        instruction::Instruction,
+    },
 };
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum State {
     Str(String),
     Int(u64),
@@ -26,7 +30,7 @@ impl std::fmt::Display for State {
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Eq, Ord)]
+#[derive(Clone, Debug)]
 pub struct Alias {
     name: String,
     state: u64,
@@ -47,38 +51,60 @@ impl std::fmt::Display for Alias {
     }
 }
 
+// This is the alias state manager.
+// It allows to store the aliases of the states and
+// to translate back and forth between the aliases and the numbers.
+// Every alias string is associated with exactly one number and
+// every number (in the aliases) is associated with exactly one alias string.
+// (forall a1, a2 in aliases)(a1.name == a2.name <--> a1.value == a2.value)
 pub struct AliasMgr {
     aliases: Vec<Alias>,
 }
 
 impl AliasMgr {
-    pub fn new(mut aliases: Vec<Alias>) -> Self {
-        aliases.sort();
+    fn are_aliases_one_to_one(aliases: &mut [Alias]) -> Result<(), DuplicateError<Alias>> {
+        aliases.sort_unstable_by_key(|alias| alias.state);
 
-        if !has_unique_elements(&aliases) {
-            // TODO: properly handle errors
-            panic!("Aliases are not unique!");
-        }
+        has_unique_elements_by(aliases, |a1, a2| a1.state == a2.state, "StateAlias")?;
 
-        Self { aliases }
+        aliases.sort_unstable_by_key(|alias| alias.name.clone());
+
+        has_unique_elements_by(aliases, |a1, a2| a1.name == a2.name, "StateAlias")
     }
 
-    pub fn translate_state(&self, state: &State) -> Option<SimpleState> {
+    pub fn new(mut aliases: Vec<Alias>) -> Result<Self, DuplicateError<Alias>> {
+        AliasMgr::are_aliases_one_to_one(&mut aliases)?;
+
+        Ok(Self { aliases })
+    }
+
+    pub fn translate_state(&self, state: &State) -> Result<SimpleState, NotFoundError<State>> {
         match state {
-            State::Int(num) => Some(*num),
+            State::Int(num) => Ok(*num),
             State::Str(string) => self
                 .aliases
                 .binary_search_by(|alias| alias.name.cmp(string))
-                .ok()
-                .map(|num| self.aliases[num].state),
+                .map(|num| self.aliases[num].state)
+                .map_err(|_| NotFoundError::new(state.clone(), "list of aliases")),
         }
     }
 
-    pub fn translate_instruction(&self, instruction: &Instruction) -> Option<SimpleInstruction> {
-        let start_state = self.translate_state(instruction.start_state())?;
-        let end_state = self.translate_state(instruction.end_state())?;
+    pub fn translate_instruction(
+        &self,
+        instruction: &Instruction,
+    ) -> Result<SimpleInstruction, InstructionError> {
+        let start_state = self
+            .translate_state(instruction.start_state())
+            .map_err(|err| {
+                InstructionError::new(InstructionFieldError::StartState(err), instruction.clone())
+            })?;
+        let end_state = self
+            .translate_state(instruction.end_state())
+            .map_err(|err| {
+                InstructionError::new(InstructionFieldError::EndState(err), instruction.clone())
+            })?;
 
-        Some(SimpleInstruction(
+        Ok(SimpleInstruction(
             start_state,
             instruction.start_symbol(),
             end_state,

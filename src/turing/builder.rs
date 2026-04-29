@@ -1,5 +1,11 @@
 use super::{Alias, Instruction, TuringMachine, state::AliasMgr, tape::Tape};
-use crate::{common::has_unique_elements, turing::State};
+use crate::{
+    common::has_unique_elements,
+    turing::{
+        State,
+        error::{BuilderError, InstructionError, InstructionFieldError, NotFoundError},
+    },
+};
 
 pub struct TuringMachineBuilder<'a> {
     default_symbol: char,
@@ -45,44 +51,55 @@ impl<'a> TuringMachineBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> TuringMachine {
+    pub fn build(self) -> Result<TuringMachine, BuilderError> {
         // build basic TM
-        let mut tm = TuringMachine::new(self.default_symbol, self.symbols);
+        let mut tm = TuringMachine::new(self.default_symbol, self.symbols)?;
 
         // Build aliases
-        tm.alias_mgr = AliasMgr::new(self.aliases);
+        tm.alias_mgr = AliasMgr::new(self.aliases).map_err(|err| BuilderError::Alias(err))?;
 
         // Build initial state
-        match tm.alias_mgr.translate_state(&self.initial_state) {
-            Some(state) => tm.current_state = state,
-            None => {
-                panic!("Initial state not found in state aliases!");
-            }
-        }
+        tm.current_state = tm
+            .alias_mgr
+            .translate_state(&self.initial_state)
+            .map_err(|err| BuilderError::InitialState(err))?;
 
         // Build instructions
         let mut simple_instructions = Vec::new();
 
         for instr in self.instructions.iter() {
-            match tm.alias_mgr.translate_instruction(instr) {
-                Some(instr) => {
-                    // check that symbols of instr are in tm.symbols
-                    if tm.symbols.binary_search(&instr.1).is_ok()
-                        && tm.symbols.binary_search(&instr.3).is_ok()
-                    {
-                        simple_instructions.push(instr)
-                    } else {
-                        // TODO: handle SymbolError
-                    }
-                }
-                // TODO: handle StateAliasError
-                None => (),
+            let instr = tm
+                .alias_mgr
+                .translate_instruction(instr)
+                .map_err(|err| BuilderError::Instruction(err))?;
+            // check that symbols of instr are in tm.symbols
+
+            if tm.symbols.binary_search(&instr.1).is_err() {
+                return Err(BuilderError::Instruction(InstructionError::new(
+                    InstructionFieldError::StartSymbol(NotFoundError::new(
+                        instr.1,
+                        "list of symbols",
+                    )),
+                    Instruction::from(&instr),
+                )));
             }
+
+            if tm.symbols.binary_search(&instr.3).is_err() {
+                return Err(BuilderError::Instruction(InstructionError::new(
+                    InstructionFieldError::EndSymbol(NotFoundError::new(
+                        instr.3,
+                        "list of symbols",
+                    )),
+                    Instruction::from(&instr),
+                )));
+            }
+
+            simple_instructions.push(instr);
         }
 
         simple_instructions.sort();
-        if !has_unique_elements(&simple_instructions) {
-            panic!("Error: instructions are not unique!");
+        if let Err(err) = has_unique_elements(&simple_instructions, "instruction") {
+            return Err(BuilderError::DupInstruction(err));
         }
 
         tm.instructions = simple_instructions;
@@ -90,6 +107,6 @@ impl<'a> TuringMachineBuilder<'a> {
         // Build tape
         tm.tape = Tape::from(tm.tape.default_symbol(), self.tape_index, self.tape_data);
 
-        tm
+        Ok(tm)
     }
 }

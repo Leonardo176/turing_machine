@@ -4,7 +4,7 @@ pub use simple::SimpleInstruction;
 
 use super::{Direction, state::State};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Instruction {
     start_state: State,
     start_symbol: char,

@@ -1,9 +1,13 @@
 use super::{duplicate::DuplicateError, instruction::InstructionError, not_found::NotFoundError};
-use crate::{Alias, turing::State};
+use crate::{
+    Alias,
+    turing::{State, instruction::SimpleInstruction},
+};
 
 #[derive(Debug)]
 pub enum BuilderError {
     Instruction(InstructionError),
+    DupInstruction(DuplicateError<SimpleInstruction>),
     Alias(DuplicateError<Alias>),
     Symbol(DuplicateError<char>),
     InitialState(NotFoundError<State>),
@@ -17,6 +21,7 @@ impl std::fmt::Display for BuilderError {
             f,
             "{}",
             match self {
+                DupInstruction(err) => err.to_string(),
                 Instruction(err) => err.to_string(),
                 Alias(err) => err.to_string(),
                 Symbol(err) => err.to_string(),
