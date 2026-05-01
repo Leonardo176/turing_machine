@@ -5,7 +5,7 @@ mod state;
 mod tape;
 
 pub use instruction::Instruction;
-pub use state::{Alias, State, alias};
+pub use state::{Alias, State};
 pub use tape::Direction;
 
 use crate::common::has_unique_elements;

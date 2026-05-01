@@ -15,16 +15,16 @@ pub struct Instruction {
 
 impl Instruction {
     pub fn new(
-        start_state: State,
+        start_state: impl Into<State>,
         start_symbol: char,
-        end_state: State,
+        end_state: impl Into<State>,
         end_symbol: char,
         direction: Direction,
     ) -> Self {
         Self {
-            start_state,
+            start_state: start_state.into(),
             start_symbol,
-            end_state,
+            end_state: end_state.into(),
             end_symbol,
             direction,
         }

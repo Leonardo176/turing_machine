@@ -13,8 +13,16 @@ pub enum State {
     Int(u64),
 }
 
-pub fn alias(name: &str) -> State {
-    State::Str(String::from(name))
+impl From<u64> for State {
+    fn from(value: u64) -> Self {
+        Self::Int(value)
+    }
+}
+
+impl From<&str> for State {
+    fn from(value: &str) -> Self {
+        Self::Str(value.to_owned())
+    }
 }
 
 impl std::fmt::Display for State {
@@ -92,7 +100,7 @@ impl AliasMgr {
     pub fn translate_state_back(&self, state: SimpleState) -> State {
         for st in self.aliases.iter() {
             if st.state == state {
-                return alias(&st.name);
+                return st.name.as_str().into();
             }
         }
         State::Int(state)
