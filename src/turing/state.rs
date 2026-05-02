@@ -1,16 +1,68 @@
-use crate::{
-    common::has_unique_elements_by,
-    turing::{
-        SimpleInstruction, SimpleState,
-        error::{DuplicateError, InstructionError, InstructionFieldError, NotFoundError},
-        instruction::Instruction,
-    },
-};
+mod alias;
+use crate::turing::error::AliasFormatError;
+pub use alias::{Alias, AliasMgr};
+
+fn is_normal_alias(alias: &str) -> Result<(), usize> {
+    let mut i = 0;
+    for ch in alias.chars() {
+        match ch {
+            'a'..='z' | 'A'..='Z' | '_' => (),
+            _ => return Err(i),
+        }
+        i += 1;
+    }
+
+    Ok(())
+}
 
 #[derive(Clone, Debug)]
 pub enum State {
     Str(String),
     Int(u64),
+}
+
+impl State {
+    pub fn new(alias: &str, offset: u64) -> Self {
+        if is_normal_alias(alias).is_err() {
+            Self::from(alias)
+        } else {
+            Self::Str(alias.to_owned() + "+" + offset.to_string().as_str())
+        }
+    }
+
+    pub fn scompose(&self) -> Result<(Option<String>, u64), AliasFormatError> {
+        match self {
+            State::Int(st) => Ok((None, *st)),
+            State::Str(st) => {
+                let (state, offset) = match st.split_once('+') {
+                    Some(st) => st,
+                    None => (st.as_str(), "0"),
+                };
+
+                if let Err(err) = is_normal_alias(state) {
+                    return Err(AliasFormatError::new(st.to_owned(), err));
+                }
+
+                let offset = match u64::from_str_radix(offset, 10) {
+                    Ok(offset) => offset,
+                    Err(_) => {
+                        return Err(AliasFormatError::new(
+                            st.to_owned(),
+                            state.len()
+                                + offset
+                                    .chars()
+                                    .enumerate()
+                                    .find(|(_, ch)| '0' <= *ch && *ch <= '9')
+                                    .unwrap()
+                                    .0,
+                        ));
+                    }
+                };
+
+                Ok((Some(state.to_owned()), offset))
+            }
+        }
+    }
 }
 
 impl From<u64> for State {
@@ -34,111 +86,6 @@ impl std::fmt::Display for State {
                 State::Str(str) => str.to_owned(),
                 State::Int(int) => int.to_string(),
             }
-        )
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct Alias {
-    name: String,
-    state: u64,
-}
-
-impl Alias {
-    pub fn new(name: &str, state: u64) -> Self {
-        Self {
-            name: String::from(name),
-            state,
-        }
-    }
-}
-
-impl std::fmt::Display for Alias {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-// This is the alias state manager.
-// It allows to store the aliases of the states and
-// to translate back and forth between the aliases and the numbers.
-// Every alias string is associated with exactly one number and
-// every number (in the aliases) is associated with exactly one alias string.
-// (forall a1, a2 in aliases)(a1.name == a2.name <--> a1.value == a2.value)
-pub struct AliasMgr {
-    aliases: Vec<Alias>,
-}
-
-impl AliasMgr {
-    fn are_aliases_one_to_one(aliases: &mut [Alias]) -> Result<(), DuplicateError<Alias>> {
-        aliases.sort_unstable_by_key(|alias| alias.state);
-
-        has_unique_elements_by(aliases, |a1, a2| a1.state == a2.state, "StateAlias")?;
-
-        aliases.sort_unstable_by_key(|alias| alias.name.clone());
-
-        has_unique_elements_by(aliases, |a1, a2| a1.name == a2.name, "StateAlias")
-    }
-
-    pub fn new(mut aliases: Vec<Alias>) -> Result<Self, DuplicateError<Alias>> {
-        AliasMgr::are_aliases_one_to_one(&mut aliases)?;
-
-        Ok(Self { aliases })
-    }
-
-    pub fn translate_state(&self, state: &State) -> Result<SimpleState, NotFoundError<State>> {
-        match state {
-            State::Int(num) => Ok(*num),
-            State::Str(string) => self
-                .aliases
-                .binary_search_by(|alias| alias.name.cmp(string))
-                .map(|num| self.aliases[num].state)
-                .map_err(|_| NotFoundError::new(state.clone(), "list of aliases")),
-        }
-    }
-
-    pub fn translate_state_back(&self, state: SimpleState) -> State {
-        for st in self.aliases.iter() {
-            if st.state == state {
-                return st.name.as_str().into();
-            }
-        }
-        State::Int(state)
-    }
-
-    pub fn translate_instruction(
-        &self,
-        instruction: &Instruction,
-    ) -> Result<SimpleInstruction, InstructionError> {
-        let start_state = self
-            .translate_state(instruction.start_state())
-            .map_err(|err| {
-                InstructionError::new(InstructionFieldError::StartState(err), instruction.clone())
-            })?;
-        let end_state = self
-            .translate_state(instruction.end_state())
-            .map_err(|err| {
-                InstructionError::new(InstructionFieldError::EndState(err), instruction.clone())
-            })?;
-
-        Ok(SimpleInstruction(
-            start_state,
-            instruction.start_symbol(),
-            end_state,
-            instruction.end_symbol(),
-            instruction.direction(),
-        ))
-    }
-
-    pub fn translate_instruction_back(&self, instruction: &SimpleInstruction) -> Instruction {
-        let start_state = self.translate_state_back(instruction.0);
-        let end_state = self.translate_state_back(instruction.2);
-        Instruction::new(
-            start_state,
-            instruction.1,
-            end_state,
-            instruction.3,
-            instruction.4,
         )
     }
 }

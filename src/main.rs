@@ -12,9 +12,9 @@ fn main() {
             // This instructions move the "given" string after the first blank
             // Example: given this tape (b00000) where the current index is on the first blank
             // This is the result (bbbbbb00000b) and now the current index is the last b
-            Instruction::new("start", 'b', 1, 'b', Right),
-            Instruction::new(1, 'b', 20, 'b', Right),
-            Instruction::new(1, '0', 2, '0', Right),
+            Instruction::new("start", 'b', "start+1", 'b', Right),
+            Instruction::new("start+1", 'b', 20, 'b', Right),
+            Instruction::new("start+1", '0', "start+2", '0', Right),
             Instruction::new(2, 'b', 3, 'b', Right),
             Instruction::new(2, '0', 2, '0', Right),
             Instruction::new(3, 'b', 4, '0', Left),

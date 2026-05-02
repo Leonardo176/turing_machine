@@ -1,5 +1,5 @@
-use super::{duplicate::DuplicateError, instruction::InstructionError, not_found::NotFoundError};
-use crate::{Alias, Instruction, turing::State};
+use super::{DuplicateError, InstructionError, NotFoundError, StateError};
+use crate::{Alias, Instruction};
 
 #[derive(Debug)]
 pub enum BuilderError {
@@ -7,7 +7,7 @@ pub enum BuilderError {
     DupInstruction(DuplicateError<Instruction>),
     Alias(DuplicateError<Alias>),
     Symbol(DuplicateError<char>),
-    InitialState(NotFoundError<State>),
+    InitialState(StateError),
     DefaultSymbol(NotFoundError<char>),
 }
 
@@ -61,8 +61,8 @@ impl From<NotFoundError<char>> for BuilderError {
     }
 }
 
-impl From<NotFoundError<State>> for BuilderError {
-    fn from(value: NotFoundError<State>) -> Self {
+impl From<StateError> for BuilderError {
+    fn from(value: StateError) -> Self {
         Self::InitialState(value)
     }
 }

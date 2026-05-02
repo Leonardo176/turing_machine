@@ -1,13 +1,13 @@
 use crate::{
     Instruction,
-    turing::{State, error::not_found::NotFoundError},
+    turing::error::{not_found::NotFoundError, state::StateError},
 };
 
 #[derive(Debug)]
 pub enum InstructionFieldError {
-    StartState(NotFoundError<State>),
+    StartState(StateError),
     StartSymbol(NotFoundError<char>),
-    EndState(NotFoundError<State>),
+    EndState(StateError),
     EndSymbol(NotFoundError<char>),
 }
 

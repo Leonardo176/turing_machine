@@ -21,4 +21,4 @@ This is what I want to implement:
 - [x] Implement a builder pattern for creating a Turing Machine
 - [ ] Import & Export a Turing Machine in JSON (there is already an example in input.json)
 - [ ] Support for reverse computing (being able to reserve the computation)
-- [ ] Better error handling
+- [x] Better error handling
