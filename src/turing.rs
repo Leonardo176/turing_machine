@@ -56,7 +56,7 @@ impl TuringMachine {
 
     // It computes a single instruction. Returns the executed instruction.
     // The instruction returned has always its states as integers.
-    fn compute_single(&mut self) -> Option<Instruction> {
+    pub fn compute_single(&mut self) -> Option<Instruction> {
         let index_instr = self
             .instructions
             .binary_search(&SimpleInstruction::new(
