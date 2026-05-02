@@ -40,18 +40,20 @@ impl Tape {
         }
     }
 
-    pub fn from(default_symbol: char, index: usize, data: &[char]) -> Self {
+    pub fn from(default_symbol: char, index: usize, data: &str) -> Self {
         let mut tape = Self::new(default_symbol);
         let mut pos = tape.pos.clone();
-        let len = data.len();
+        let mut i = 0;
 
-        for i in 0..len {
+        for ch in data.chars() {
             if i == index {
                 pos = tape.pos.clone();
             }
 
-            tape.set_symbol(data[i]);
+            tape.set_symbol(ch);
             tape.move_right();
+
+            i += 1;
         }
 
         tape.pos = pos;

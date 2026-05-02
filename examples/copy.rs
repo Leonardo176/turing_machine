@@ -13,7 +13,7 @@ fn main() {
     let mut tm = TuringMachine::builder('b', vec!['b', '0'])
         .aliases(vec![Alias::new("start", 0), Alias::new("copy", 10)])
         .initial_state("start")
-        .tape(0, &['b'])
+        .tape(0, "b000000")
         .instructions(vec![
             Instruction::new("start", 'b', "copy", 'b', Right),
             Instruction::new("copy", '0', "copy+1", 'b', Right),

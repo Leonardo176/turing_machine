@@ -14,7 +14,7 @@ pub struct TuringMachineBuilder<'a> {
     symbols: Vec<char>,
     initial_state: State,
     tape_index: usize,
-    tape_data: &'a [char],
+    tape_data: &'a str,
     aliases: Vec<Alias>,
     instructions: Vec<Instruction>,
 }
@@ -25,7 +25,7 @@ impl<'a> TuringMachineBuilder<'a> {
             default_symbol,
             symbols,
             tape_index: 0,
-            tape_data: &[],
+            tape_data: "",
             initial_state: State::Int(0),
             aliases: Vec::new(),
             instructions: Vec::new(),
@@ -37,7 +37,7 @@ impl<'a> TuringMachineBuilder<'a> {
         self
     }
 
-    pub fn tape(mut self, tape_index: usize, tape_data: &'a [char]) -> Self {
+    pub fn tape(mut self, tape_index: usize, tape_data: &'a str) -> Self {
         self.tape_index = tape_index;
         self.tape_data = tape_data;
         self
