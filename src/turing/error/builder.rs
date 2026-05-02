@@ -9,6 +9,7 @@ pub enum BuilderError {
     Symbol(DuplicateError<char>),
     InitialState(StateError),
     DefaultSymbol(NotFoundError<char>),
+    Tape(NotFoundError<char>),
 }
 
 impl std::fmt::Display for BuilderError {
@@ -24,6 +25,7 @@ impl std::fmt::Display for BuilderError {
                 Symbol(err) => err.to_string(),
                 InitialState(err) => err.to_string(),
                 DefaultSymbol(err) => err.to_string(),
+                Tape(err) => err.to_string(),
             }
         )
     }
@@ -52,12 +54,6 @@ impl From<DuplicateError<Alias>> for BuilderError {
 impl From<DuplicateError<char>> for BuilderError {
     fn from(value: DuplicateError<char>) -> Self {
         Self::Symbol(value)
-    }
-}
-
-impl From<NotFoundError<char>> for BuilderError {
-    fn from(value: NotFoundError<char>) -> Self {
-        Self::DefaultSymbol(value)
     }
 }
 

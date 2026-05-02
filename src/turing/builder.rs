@@ -108,6 +108,17 @@ impl<'a> TuringMachineBuilder<'a> {
         tm.instructions = simple_instructions;
 
         // Build tape
+        // Check that the given tape contains valid symbols
+
+        for ch in self.tape_data.chars() {
+            if tm.symbols.binary_search(&ch).is_err() {
+                return Err(BuilderError::Tape(NotFoundError::new(
+                    ch,
+                    "list of symbols",
+                )));
+            }
+        }
+
         tm.tape = Tape::from(tm.tape.default_symbol(), self.tape_index, self.tape_data);
 
         Ok(tm)
